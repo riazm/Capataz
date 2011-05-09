@@ -2,52 +2,74 @@ using Gtk;
 using GLib;
 //using Gdk;
 
+public class FadeLabel : Gtk.Label {
+	
+	private int active_duration = 3000; // Fade starts after this time
+	private int fade_duration = 1500;	// Fade lasts this long
+
+	public FadeLabel (string message = "", string active_color = "", 
+		string inactive_colour = "") {
+		
+		this.set_text(message);
+		
+		
+		
+	}
+	
+}
+
 public class TextFileViewer : Gtk.Window {
 
-    private TextView textbox;
-	private Fixed fixed;
-	private VBox vbox;
-	private ScrolledWindow scrolled;
-	private Alignment align;
-	private EventBox boxout;
-	private EventBox boxin;
-	
+    private Gtk.TextView textbox;
+	private Gtk.ScrolledWindow scrolled;
 
     public TextFileViewer () {
-        this.title = "Text File Viewer";
+		FadeLabel status = new FadeLabel("What");
+		
+        this.title = "Capataz";
         this.position = WindowPosition.CENTER;
         set_default_size (400, 300);
 
-        this.textbox = new TextView ();
-        this.textbox.editable = true;
-        this.textbox.cursor_visible = true;
-		this.textbox.set_wrap_mode (WrapMode.WORD);
-        this.textbox.scroll_event.connect (on_scroll_event);
+        textbox = new TextView ();
+        textbox.editable = true;
+        textbox.cursor_visible = true;
+		textbox.set_wrap_mode (Gtk.WrapMode.WORD);
+        textbox.scroll_event.connect (on_scroll_event);
 
-		this.fixed = new Fixed ();
-		this.vbox = new VBox (false, 0);
-		this.align = new Alignment (0.5f, 0.5f, 0.5f, 0.5f);
-		this.align.add (this.vbox);
-		add (this.align);
+		Gtk.Fixed fixed = new Gtk.Fixed ();
+		Gtk.VBox vbox = new Gtk.VBox (false, 0);
+		
+		Gtk.Alignment alignment = new Alignment (0.5f, 0.5f, 0.5f, 0.5f);
+		alignment.add (vbox);
+		add (alignment);
 
-		this.boxout = new EventBox ();
-		this.boxout.set_border_width (1);
-		this.boxin = new EventBox ();
-		this.boxin.set_border_width (1);
-		this.vbox.pack_start (this.boxout, true, true, 1);
-		this.boxout.add (this.boxin);
+		Gtk.EventBox boxout = new Gtk.EventBox ();
+		boxout.set_border_width (1);
+		
+		Gtk.EventBox boxin = new Gtk.EventBox ();
+		boxin.set_border_width (1);
+		vbox.pack_start (boxout, true, true, 1);
+		boxout.add (boxin);
 
-		this.scrolled = new ScrolledWindow(null, null);
-		this.boxin.add(this.scrolled);
-		this.scrolled.add(this.textbox);
-        this.scrolled.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
-		this.scrolled.show ();
-		this.scrolled.set_property("resize_mode", ResizeMode.PARENT);
-		this.textbox.set_property("resize_mode", ResizeMode.PARENT);
-		this.vbox.set_property("resize_mode", ResizeMode.PARENT);
-		this.vbox.show_all ();
+		scrolled = new Gtk.ScrolledWindow(null, null);
+		boxin.add(scrolled);
+		scrolled.add(this.textbox);
+        scrolled.set_policy (Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
+		scrolled.show ();
+		scrolled.set_property("resize_mode", Gtk.ResizeMode.PARENT);
+		textbox.set_property("resize_mode", Gtk.ResizeMode.PARENT);
+		vbox.set_property("resize_mode", Gtk.ResizeMode.PARENT);
+		vbox.show_all ();
 			
 		// Status     
+		Gtk.HBox hbox = new Gtk.HBox(false, 0);
+		hbox.set_spacing(12);
+		hbox.pack_end(status, true, true, 0);
+		vbox.pack_end(hbox, false, false, 0);
+		status.set_alignment(0.0f, 0.5f);
+		status.set_justify(Gtk.Justification.LEFT);
+		
+		
     }
 
     private bool on_scroll_event (Gdk.EventScroll e) {
@@ -55,8 +77,7 @@ public class TextFileViewer : Gtk.Window {
 			stderr.printf ("We scrollin up breds");
 			scroll_up ();
 			
-		}
-		else if (e.direction == Gdk.ScrollDirection.DOWN) {
+		} else if (e.direction == Gdk.ScrollDirection.DOWN) {
 			stderr.printf("We scrollin down breds");
 			scroll_down ();
 		}
@@ -68,8 +89,7 @@ public class TextFileViewer : Gtk.Window {
 		Adjustment adj = this.scrolled.get_vadjustment ();
 		if (adj.value > adj.step_increment) {
 			adj.value -= adj.step_increment;
-		}
-		else {
+		} else {
 			adj.value = 0;
 		}
 	}
