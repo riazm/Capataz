@@ -11,7 +11,7 @@ PROGRAM = capataz
 SRC = gui.vala
  
 # add your used packges here
-PKGS = --pkg gtk+-2.0 --pkg glib-2.0
+PKGS = --pkg gtk+-3.0 --pkg glib-2.0
  
 # vala compiler
 VALAC = valac

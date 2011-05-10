@@ -1,19 +1,43 @@
 using Gtk;
 using GLib;
-//using Gdk;
 
 public class FadeLabel : Gtk.Label {
 	
 	private int active_duration = 3000; // Fade starts after this time
 	private int fade_duration = 1500;	// Fade lasts this long
+	private int fade_level = 0;
+	private int idle = 0;
+	private string active_colour = "#ffffff";
+	private string inactive_colour = "#000000";
 
-	public FadeLabel (string message = "", string active_color = "", 
+	public FadeLabel (string message = "", string active_colour = "", 
 		string inactive_colour = "") {
 		
 		this.set_text(message);
-		
-		
-		
+
+		if (active_colour == "") {
+			active_colour = "#ffffff";
+		} else {
+			this.active_colour = active_colour;
+		}
+
+		if (inactive_colour == "") {
+			inactive_colour = "#000000";
+		} else {
+			this.inactive_colour = inactive_colour;
+		}
+	}
+
+	new void set_text (string message, int duration = 0) {
+		/*Change the displayed text
+		  string message: message to display
+		  int duration: duration in milliseconds*/
+		if (duration == 0) {
+			duration = this.active_duration;
+		}
+		(this as Gtk.Label).set_text(message);
+		//	modify_fg(Gtk.StateType.NORMAL, Gdk.Color.parse(this.active_colour, null));
+
 	}
 	
 }
@@ -27,7 +51,6 @@ public class TextFileViewer : Gtk.Window {
 		FadeLabel status = new FadeLabel("What");
 		
         this.title = "Capataz";
-        this.position = WindowPosition.CENTER;
         set_default_size (400, 300);
 
         textbox = new TextView ();
