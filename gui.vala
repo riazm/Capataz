@@ -137,6 +137,19 @@ public class TextFileViewer : Gtk.Window {
 		
     }
 
+	private bool apply_theme () {
+		GLib.KeyFile theme_key = new GLib.KeyFile (); 
+		try {
+			theme_key.load_from_file ("/usr/share/pyroom/themes/amber.theme", GLib.KeyFileFlags.NONE);
+		} catch (GLib.KeyFileError key_file_error) {
+			stderr.printf("Something wrong with the KeyFile\n");
+		} catch (GLib.FileError file_error) {
+			stderr.printf("Something wrong with finding the theme file\n");
+		}
+		
+		return false;
+	}
+
     private bool on_scroll_event (Gdk.EventScroll e) {
 		if (e.direction == Gdk.ScrollDirection.UP) {
 			stderr.printf ("We scrollin up breds");
