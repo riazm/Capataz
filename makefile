@@ -8,7 +8,7 @@ PROGRAM = capataz
  
 # for most cases the following two are the only you'll need to change
 # add your source files here
-SRC = gui.vala
+SRC = gui.vala fadelabel.vala
  
 # add your used packges here
 PKGS = --pkg gtk+-3.0 --pkg glib-2.0
