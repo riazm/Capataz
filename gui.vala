@@ -5,12 +5,15 @@ public class TextFileViewer : Gtk.Window {
 	private Gtk.VBox vbox;
 	private Gtk.HBox hbox;
 	private Gtk.EventBox boxout;
+	private Gtk.EventBox boxin;
+	private Gtk.Alignment alignment;
 	private FadeLabel status;
 
     public TextFileViewer () {
 		status = new FadeLabel();
 		status.set_text("Initialised", 500);
         this.title = "Capataz";
+//		this.fullscreen();
 
         textbox = new Gtk.TextView ();
         textbox.editable = true;
@@ -18,17 +21,16 @@ public class TextFileViewer : Gtk.Window {
 		textbox.set_wrap_mode (Gtk.WrapMode.WORD);
         textbox.scroll_event.connect (on_scroll_event);
 
-		Gtk.Fixed fixed = new Gtk.Fixed ();
 		vbox = new Gtk.VBox (false, 0);
 		
-		Gtk.Alignment alignment = new Gtk.Alignment (0.5f, 0.5f, 0.5f, 0.5f);
+		alignment = new Gtk.Alignment (0.5f, 0.5f, 0.0f, 0.0f);
 		alignment.add (vbox);
 		add (alignment);
 
 		boxout = new Gtk.EventBox ();
 		boxout.set_border_width (1);
 		
-		Gtk.EventBox boxin = new Gtk.EventBox ();
+		boxin = new Gtk.EventBox ();
 		boxin.set_border_width (1);
 		vbox.pack_start (boxout, true, true, 1);
 		boxout.add (boxin);
@@ -51,11 +53,45 @@ public class TextFileViewer : Gtk.Window {
 		status.set_alignment(0.0f, 0.5f);
 		status.set_justify(Gtk.Justification.LEFT);
 
+		apply_config();
 		apply_theme("default.theme");
 		
 		
     }
+	private void apply_config () {
+	
+		GLib.KeyFile config_key = new GLib.KeyFile ();
+		string config_path;
+		string[] config_dirs = {GLib.Environment.get_home_dir(), "."};
+		try {
+			config_key.load_from_dirs("capataz.conf", config_dirs, 
+				out config_path, GLib.KeyFileFlags.NONE);
+			// TODO get a default when it fails or osmething
+		} catch (GLib.KeyFileError key_file_error) {
+			GLib.error("Something wrong with" + config_path);
+		} catch (GLib.FileError file_error) {
+			GLib.error("Couldn't load " + config_path);
+		}
+		
+		if (config_key.get_integer("visual", "showborder") == 0) {
+			this.boxin.set_border_width(0);
+			this.boxout.set_border_width(0);
+		} else {
+			this.boxin.set_border_width(1);
+			this.boxout.set_border_width(1);
+		}
 
+		// TODO get font 
+		// TODO get indent
+		
+		int linespacing = config_key.get_integer("visual", "linespacing");
+        this.textbox.set_pixels_below_lines(linespacing);
+        this.textbox.set_pixels_above_lines(linespacing);
+        this.textbox.set_pixels_inside_wrap(linespacing);
+
+		this.alignment.set(0.5f, (float)config_key.get_double("visual", "alignment"), 0f, 0f);
+	}
+	
 	private bool apply_theme (string theme) {
 		GLib.KeyFile theme_key = new GLib.KeyFile (); 
 		string[] theme_dirs = {"./themes/"};
@@ -63,7 +99,7 @@ public class TextFileViewer : Gtk.Window {
 		try {
 			theme_key.load_from_dirs (theme, theme_dirs, out theme_full_path, GLib.KeyFileFlags.NONE);
 		} catch (GLib.KeyFileError key_file_error) {
-			stderr.printf("Something wrong with the KeyFile\n");
+			stderr.printf("Something wrong with " + theme_full_path + "\n");
 		} catch (GLib.FileError file_error) {
 			stderr.printf("Something wrong with finding the theme file\n");
 		}
