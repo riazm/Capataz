@@ -81,8 +81,25 @@ public class TextFileViewer : Gtk.Window {
 			this.boxout.set_border_width(1);
 		}
 
-		// TODO get font 
-		// TODO get indent
+		// This seems sketch, I've not tested it for non custom fonts
+		string new_font;
+		string use_font_type = config_key.get_string("visual", "use_font_type");
+		if ((use_font_type == "custom")) {
+			new_font = config_key.get_string("visual", "custom_font");
+		} else {
+			new_font = config_key.get_string("visual", "use_font_type");
+		}
+		Pango.FontDescription font_description = Pango.FontDescription.from_string(new_font);
+		this.textbox.modify_font(font_description);
+
+		if (config_key.get_integer("visual", "indent") == 1) {
+			Pango.Context pango_context = this.textbox.get_pango_context();
+			font_description = pango_context.get_font_description();
+			int current_font_size = font_description.get_size() / 1024;
+			this.textbox.set_indent(current_font_size * 2);
+		} else {
+			this.textbox.set_indent(0);
+		}
 		
 		int linespacing = config_key.get_integer("visual", "linespacing");
         this.textbox.set_pixels_below_lines(linespacing);
@@ -91,7 +108,7 @@ public class TextFileViewer : Gtk.Window {
 
 		this.alignment.set(0.5f, (float)config_key.get_double("visual", "alignment"), 0f, 0f);
 	}
-	
+
 	private bool apply_theme (string theme) {
 		GLib.KeyFile theme_key = new GLib.KeyFile (); 
 		string[] theme_dirs = {"./themes/"};
@@ -150,11 +167,11 @@ public class TextFileViewer : Gtk.Window {
 
     private bool on_scroll_event (Gdk.EventScroll e) {
 		if (e.direction == Gdk.ScrollDirection.UP) {
-			stderr.printf ("We scrollin up breds");
+			GLib.message ("We scrollin up breds");
 			scroll_up ();
 			
 		} else if (e.direction == Gdk.ScrollDirection.DOWN) {
-			stderr.printf("We scrollin down breds");
+			GLib.message ("We scrollin down breds");
 			scroll_down ();
 		}
 		
