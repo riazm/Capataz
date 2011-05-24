@@ -1,5 +1,6 @@
-public class TextFileViewer : Gtk.Window {
+public class TextFileViewer : GLib.Object {
 
+	public Gtk.Window window;
     private Gtk.TextView textbox;
 	private Gtk.ScrolledWindow scrolled;
 	private Gtk.VBox vbox;
@@ -12,8 +13,15 @@ public class TextFileViewer : Gtk.Window {
     public TextFileViewer () {
 		status = new FadeLabel();
 		status.set_text("Initialised", 500);
-        this.title = "Capataz";
-//		this.fullscreen();
+
+		window = new Gtk.Window(Gtk.WindowType.TOPLEVEL);
+		window.set_name("Capataz");
+		window.set_title("Capataz");
+		window.destroy.connect (Gtk.main_quit);
+        window.show_all ();
+
+		// window.connect("delete_event", delete_event); neither of these have functions
+		// window.connect("destroy", destroy);
 
         textbox = new Gtk.TextView ();
         textbox.editable = true;
@@ -25,7 +33,7 @@ public class TextFileViewer : Gtk.Window {
 		
 		alignment = new Gtk.Alignment (0.5f, 0.5f, 0.0f, 0.0f);
 		alignment.add (vbox);
-		add (alignment);
+		window.add (alignment);
 
 		boxout = new Gtk.EventBox ();
 		boxout.set_border_width (1);
@@ -116,9 +124,9 @@ public class TextFileViewer : Gtk.Window {
 		try {
 			theme_key.load_from_dirs (theme, theme_dirs, out theme_full_path, GLib.KeyFileFlags.NONE);
 		} catch (GLib.KeyFileError key_file_error) {
-			stderr.printf("Something wrong with " + theme_full_path + "\n");
+			GLib.error("Something wrong with " + theme_full_path + "\n");
 		} catch (GLib.FileError file_error) {
-			stderr.printf("Something wrong with finding the theme file\n");
+			GLib.error("Something wrong with finding the theme file\n");
 		}
 		
 		this.textbox.set_border_width (theme_key.get_integer ("theme", "padding"));
@@ -194,14 +202,4 @@ public class TextFileViewer : Gtk.Window {
 		}
 	}
 
-    public static int main (string[] args) {
-        Gtk.init (ref args);
-
-        var window = new TextFileViewer ();
-        window.destroy.connect (Gtk.main_quit);
-        window.show_all ();
-
-        Gtk.main ();
-        return 0;
-    }
 }
